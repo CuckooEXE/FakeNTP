@@ -19,5 +19,5 @@ options:
   -p PORT, --port PORT  The port to listen on. Default is 123.
   --static-time         Respond to all requests with a static time, rather than incrementing the time.
   --time TIME           The time to respond with (in epoch diff). Default is
-                        "datetime.datetime.utcnow().timestamp()".
+                        "datetime.datetime.now().timestamp()".
 ```
