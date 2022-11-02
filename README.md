@@ -3,9 +3,11 @@
 # FakeNTP
 A light-weight fake Network Time Protocol server that allows you to trick NTP clients into changing their time.
 
-> Inspired by [FakeDns](https://github.com/Crypt0s/FakeDns/)
+<p align="center">
+  <img width="350" src="https://raw.githubusercontent.com/CuckooEXE/FakeNTP/main/FakeNTP.png">
+</p>
 
-![FakeNTP](FakeNTP.png)
+> Inspired by [FakeDns](https://github.com/Crypt0s/FakeDns/)
 
 ## Usage
 To use FakeNTP, you can ues the Docker container, or just run the Python script itself:
