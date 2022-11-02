@@ -117,8 +117,8 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         response.root_dispersion = _to_int(0.000030) << 16 | _to_frac(0.000030, 16)
         response.reference_identifier = int.from_bytes(b"NIST", byteorder="big") # NIST Public Modem
         response.reference_timestamp = _to_int(now-30) << 32 | _to_frac(now-30, 32) # 30 seconds ago, just a lie to make it believable :)
-        response.originate_timestamp = _to_int(now) << 32 | _to_frac(now, 32)
-        response.receive_timestamp = request.transmit_timestamp
+        response.originate_timestamp = request.transmit_timestamp
+        response.receive_timestamp = _to_int(now) << 32 | _to_frac(now, 32)
         response.transmit_timestamp = _to_int(now) << 32 | _to_frac(now, 32)
 
         logging.debug("Responding with time: {}".format(datetime.datetime.fromtimestamp(now - _NTP_DELTA)))
