@@ -98,7 +98,7 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         logging.debug("Received {} bytes from: {}:{}".format(len(data), *self.client_address))
 
         # Update the time if we're using a static time
-        if self.args.static_time:
+        if not self.args.static_time:
             self.args.time = datetime.datetime.now().timestamp()
         now = system_to_ntp_time(self.args.time)
 
@@ -113,10 +113,10 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         response.stratum = NTPStratum.SECONDARY_REFERENCE
         response.poll = 1
         response.precision = 0xFFFFFFE7
-        response.root_delay = _to_int(0.000030) << 16 | _to_frac(0.000030, 16)
+        response.root_delay = _to_int(32) << 16 | _to_frac(32, 16)
         response.root_dispersion = _to_int(0.000030) << 16 | _to_frac(0.000030, 16)
-        response.reference_identifier = int.from_bytes(b"LOCL", byteorder="big")
-        response.reference_timestamp = _to_int(now-30) << 32 | _to_frac(now, 32) # 30 seconds ago, just a lie to make it believable :)
+        response.reference_identifier = int.from_bytes(b"NIST", byteorder="big") # NIST Public Modem
+        response.reference_timestamp = _to_int(now-30) << 32 | _to_frac(now-30, 32) # 30 seconds ago, just a lie to make it believable :)
         response.originate_timestamp = _to_int(now) << 32 | _to_frac(now, 32)
         response.receive_timestamp = request.transmit_timestamp
         response.transmit_timestamp = _to_int(now) << 32 | _to_frac(now, 32)
@@ -143,6 +143,10 @@ def main():
     parser.add_argument('--passthru', default=False, action='store_true', help='Pass through requests to the real NTP server.')
     parser.add_argument('--ntp-server', type=str, default='pool.ntp.org', help='The NTP server to pass requests to. Default is "pool.ntp.org".')
     args = parser.parse_args()
+
+    # Validate the arguments
+    if args.time_step and args.static_time:
+        raise ValueError("Cannot use --time-step and --static-time together.")
 
     # Create logger
     logging.basicConfig(format="[%(levelname)s][%(asctime)s][%(funcName)s]: %(message)s", level=(logging.DEBUG if args.verbose else logging.INFO))
