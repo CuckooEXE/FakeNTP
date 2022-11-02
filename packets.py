@@ -6,10 +6,9 @@ Packets - Packet Definitions
 """
 Imported Libraries
 
-typing - Used for type hinting.
 ctypes - Used to create a C structure.
+enum - Used to create an enum type.
 """
-from typing import Literal
 import ctypes
 import enum
 
@@ -18,24 +17,29 @@ class NTPLI(enum.IntEnum):
     """
     NTP Leap Indicator
     """
+
     NO_WARNING = 0
     LAST_MINUTE_61 = 1
     LAST_MINUTE_59 = 2
     ALARM = 3
 
+
 class NTPVN(enum.IntEnum):
     """
     NTP Version Number
     """
+
     VERSION_1 = 1
     VERSION_2 = 2
     VERSION_3 = 3
     VERSION_4 = 4
 
+
 class NTPMode(enum.IntEnum):
     """
     NTP Mode
     """
+
     RESERVED = 0
     SYMMETRIC_ACTIVE = 1
     SYMMETRIC_PASSIVE = 2
@@ -45,10 +49,12 @@ class NTPMode(enum.IntEnum):
     NTP_CONTROL_MESSAGE = 6
     PRIVATE = 7
 
+
 class NTPStratum(enum.IntEnum):
     """
     NTP Stratum
     """
+
     UNSPECIFIED = 0
     PRIMARY_REFERENCE = 1
     SECONDARY_REFERENCE = 2
@@ -57,35 +63,36 @@ class NTPStratum(enum.IntEnum):
 
 
 class StructHelper(object):
-    def __get_value_str(self, name, fmt='{}'):
+    def __get_value_str(self, name, fmt="{}"):
         val = getattr(self, name)
         if isinstance(val, ctypes.Array):
             val = list(val)
         return fmt.format(val)
 
     def __str__(self):
-        result = '{}:\n'.format(self.__class__.__name__)
+        result = "{}:\n".format(self.__class__.__name__)
         maxname = max(len(f[0]) for f in self._fields_)
         for field in self._fields_:
             if len(field) == 3:
-                name, type_, bitlen_ = field
+                name, type_, _ = field
             else:
                 name, type_ = field
-                bitlen_ = None
-            value = getattr(self, name)
-            result += ' {name:<{width}}: {value}\n'.format(
-                    name = name,
-                    width = maxname,
-                    value = self.__get_value_str(name),
-                    )
+                _ = None
+            result += " {name:<{width}}: {value}\n".format(
+                name=name,
+                width=maxname,
+                value=self.__get_value_str(name),
+            )
         return result
 
     def __repr__(self):
-        return '{name}({fields})'.format(
-                name = self.__class__.__name__,
-                fields = ', '.join(
-                    '{}={}'.format(name, self.__get_value_str(name, '{!r}')) for name, _ in self._fields_)
-                )
+        return "{name}({fields})".format(
+            name=self.__class__.__name__,
+            fields=", ".join(
+                "{}={}".format(name, self.__get_value_str(name, "{!r}"))
+                for name, _ in self._fields_
+            ),
+        )
 
     @classmethod
     def _typeof(cls, field):
@@ -113,22 +120,23 @@ class StructHelper(object):
         """
         return bytes(self)
 
+
 class NTPv3(ctypes.BigEndianStructure, StructHelper):
     _pack_ = 1
     _fields_ = [
-        ('li', ctypes.c_uint8, 2),
-        ('vn', ctypes.c_uint8, 3),
-        ('mode', ctypes.c_uint8, 3),
-        ('stratum', ctypes.c_uint8),
-        ('poll', ctypes.c_uint8),
-        ('precision', ctypes.c_uint8),
-        ('root_delay', ctypes.c_uint32),
-        ('root_dispersion', ctypes.c_uint32),
-        ('reference_identifier', ctypes.c_uint32),
-        ('reference_timestamp', ctypes.c_uint64),
-        ('originate_timestamp', ctypes.c_uint64),
-        ('receive_timestamp', ctypes.c_uint64),
-        ('transmit_timestamp', ctypes.c_uint64)
+        ("li", ctypes.c_uint8, 2),
+        ("vn", ctypes.c_uint8, 3),
+        ("mode", ctypes.c_uint8, 3),
+        ("stratum", ctypes.c_uint8),
+        ("poll", ctypes.c_uint8),
+        ("precision", ctypes.c_uint8),
+        ("root_delay", ctypes.c_uint32),
+        ("root_dispersion", ctypes.c_uint32),
+        ("reference_identifier", ctypes.c_uint32),
+        ("reference_timestamp", ctypes.c_uint64),
+        ("originate_timestamp", ctypes.c_uint64),
+        ("receive_timestamp", ctypes.c_uint64),
+        ("transmit_timestamp", ctypes.c_uint64),
     ]
 
     def __init__(self, *args, **kwargs):
@@ -146,4 +154,3 @@ class NTPv3(ctypes.BigEndianStructure, StructHelper):
         self.originate_timestamp = 0
         self.receive_timestamp = 0
         self.transmit_timestamp = 0
-    
