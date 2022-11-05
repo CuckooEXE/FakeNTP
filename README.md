@@ -1,4 +1,5 @@
 [![Utility Tests](https://github.com/CuckooEXE/FakeNTP/actions/workflows/utility-tests.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/utility-tests.yml)
+[![CodeQL](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml)
 
 # FakeNTP
 A light-weight fake Network Time Protocol server that allows you to trick NTP clients into changing their time.
