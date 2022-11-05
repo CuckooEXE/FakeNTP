@@ -12,6 +12,7 @@ datetime - Used to get the current time.
 socketserver - Used to create a multi-threaded server.
 logging - Used to generate log messages.
 signal - Used to capture SIGINT for graceful shutdown.
+socket - Used to proxy connections to upstream NTP servers.
 sys - Used to exit the process.
 time - Used to get the epoch time.
 packets - Used to create the NTP packet.
@@ -21,6 +22,7 @@ import datetime
 import socketserver
 import logging
 import signal
+import socket
 import sys
 import time
 from packets import NTPLI, NTPVN, NTPMode, NTPStratum, NTPv3
@@ -99,14 +101,25 @@ def _to_frac(timestamp: int, bits: int = 32):
 class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
         data, sock = self.request
-        logging.debug(
-            "Received {} bytes from: {}:{}".format(
-                len(data), *self.client_address
-            )
+        logging.info(
+            "Received NTP request from: {}:{}".format(*self.client_address)
         )
 
+        # Check if we're passing the request to an upstream NTP server
+        if self.args.passthru:
+            # If so, send the request to the upstream NTP server and return its response
+            logging.debug("Proxying request to upstream NTP server")
+            with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as s:
+                s.connect((self.args.ntp_server, 123))
+                s.send(data)
+                response = NTPv3.from_buffer_copy(s.recv(1024))
+            logging.debug("Request:\n{}".format(request))
+            logging.debug("Response:\n{}".format(response))
+            sock.sendto(response.get_bytes(), self.client_address)
+            return
+
         # Update the time if we're using a static time
-        if not self.args.static_time:
+        if not self.args.static_time and not self.args.time_step:
             self.args.time = datetime.datetime.now().timestamp()
         now = system_to_ntp_time(self.args.time)
 
@@ -146,11 +159,14 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
 
         # If we have a timestep, then we need to increment the time by that much
         if self.args.time_step:
-            self.args.time += datetime.timedelta(seconds=self.args.time_step)
+            self.args.time += self.args.time_step
 
 
-def main():
-    # Parse the arguments
+def build_parser() -> argparse.ArgumentParser:
+    """Build the argument parser
+    :return: Argument parser
+    :rtype: argparse.ArgumentParser
+    """
     parser = argparse.ArgumentParser(
         description="FakeNTP - A light-weight fake Network Time Protocol server that allows you to trick NTP clients into changing their time."
     )
@@ -190,7 +206,7 @@ def main():
         "--passthru",
         default=False,
         action="store_true",
-        help="Pass through requests to the real NTP server.",
+        help="Pass through requests to a real NTP server (specified in --ntp-server).",
     )
     parser.add_argument(
         "--ntp-server",
@@ -198,7 +214,11 @@ def main():
         default="pool.ntp.org",
         help='The NTP server to pass requests to. Default is "pool.ntp.org".',
     )
-    args = parser.parse_args()
+    return parser
+
+def main():
+    # Parse the arguments
+    args = build_parser().parse_args()
 
     # Validate the arguments
     if args.time_step and args.static_time:
@@ -214,7 +234,7 @@ def main():
     signal.signal(signal.SIGINT, signal_handler)
 
     # Create the server
-    logging.debug("Creating server on {}:{}".format(args.ip, args.port))
+    logging.info("Creating server on {}:{}".format(args.ip, args.port))
     server = socketserver.ThreadingUDPServer(
         (args.ip, args.port), ThreadedUDPRequestHandler
     )

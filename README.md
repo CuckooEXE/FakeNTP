@@ -2,7 +2,7 @@
 [![CodeQL](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml)
 
 # FakeNTP
-A light-weight fake Network Time Protocol server that allows you to trick NTP clients into changing their time.
+A light-weight Network Time Protocol server that allows you to respond to NTP requests in a malicious manner. 
 
 <p align="center">
   <img width="350" src="https://raw.githubusercontent.com/CuckooEXE/FakeNTP/main/FakeNTP.png">
@@ -11,7 +11,6 @@ A light-weight fake Network Time Protocol server that allows you to trick NTP cl
 > Inspired by [FakeDns](https://github.com/Crypt0s/FakeDns/)
 
 ## Usage
-To use FakeNTP, you can ues the Docker container, or just run the Python script itself:
 ```bash
 $ python3 FakeNTP.py --help
 usage: FakeNTP.py [-h] [--verbose] [--ip IP] [--port PORT] [--static-time] [--time TIME] [--time-step TIME_STEP] [--passthru]
@@ -34,7 +33,20 @@ options:
                         The NTP server to pass requests to. Default is "pool.ntp.org".
 ```
 
-## Testing
-This project has two test suites: a `pytest` suite in `tests/` that tests the utility functions, and a set of Github Actions that test the functionality of the project.
+This project is 100% Python3, no dependencies required (the `requirements.txt` is just for the test suites). For most use-cases, you will want to modify the response NTP structure in `FakeNTP.py:ThreadedUDPRequestHandler:handle` to best fit your needs. 
 
-To run these tests, you can look at the tests in `.github/workflows/{utility,functional}-tests.yml`.
+
+## Testing
+This project contains two test suites: a simple suite to test the utility functions: `tests/test_utilities`, and more full-fledged functional tests: `test_server.py`. To run these tests, you can just execute:
+
+```bash
+$ PYTHONPATH="$PWD" python3 -m pytest --cov=FakeNTP tests/
+```
+
+## Resources
+The following resources really helped me understand NTP and how to build this project:
+
+ * [what-when-how "NTP Packet Header" Article](http://what-when-how.com/computer-network-time-synchronization/ntp-packet-header-ntp-reference-implementation-computer-network-time-synchronization/)
+ * [apnic Labs](https://labs.apnic.net/?p=462)
+ * [NTPv3 RFC](https://www.rfc-editor.org/rfc/rfc1305)
+ * [NTPv4 RFC](https://datatracker.ietf.org/doc/html/rfc5905)
