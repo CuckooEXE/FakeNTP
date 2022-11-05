@@ -105,6 +105,9 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
             "Received NTP request from: {}:{}".format(*self.client_address)
         )
 
+        # Parse the NTP request
+        request = NTPv3.from_buffer_copy(data)
+
         # Check if we're passing the request to an upstream NTP server
         if self.args.passthru:
             # If so, send the request to the upstream NTP server and return its response
@@ -122,9 +125,6 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
         if not self.args.static_time and not self.args.time_step:
             self.args.time = datetime.datetime.now().timestamp()
         now = system_to_ntp_time(self.args.time)
-
-        # Parse the NTP request
-        request = NTPv3.from_buffer_copy(data)
 
         # Build the NTP response
         response = NTPv3()
@@ -215,6 +215,7 @@ def build_parser() -> argparse.ArgumentParser:
         help='The NTP server to pass requests to. Default is "pool.ntp.org".',
     )
     return parser
+
 
 def main():
     # Parse the arguments

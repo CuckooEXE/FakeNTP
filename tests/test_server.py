@@ -6,7 +6,6 @@ Test the server functionality of FakeNTP.
 """
 Imported Libraries
 
-pytest - Used to run the tests.
 datetime - Used to get the current time.
 threading - Thread management.
 socketserver - Used to create a multi-threaded server.
@@ -14,7 +13,6 @@ argparse - Mock command line arguments.
 ntplib - Used to send NTP requests.
 FakeNTP - Used to test the utility functions.
 """
-import pytest
 import datetime
 import threading
 import socketserver

@@ -1,4 +1,4 @@
-name: "Utility Tests"
+name: "Tests"
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
     - cron: '23 12 * * 1'
 
 jobs:
-  unit-tests:
+  tests:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -25,4 +25,4 @@ jobs:
         run: python3 -m pip install -r requirements.txt
 
       - name: Run Tests
-        run: PYTHONPATH="${GITHUB_WORKSPACE}" pytest -vvv tests
+        run: PYTHONPATH="${GITHUB_WORKSPACE}" python3 -m pytest --cov=FakeNTP tests/

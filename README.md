@@ -1,8 +1,8 @@
-[![Utility Tests](https://github.com/CuckooEXE/FakeNTP/actions/workflows/utility-tests.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/utility-tests.yml)
+[![Tests](https://github.com/CuckooEXE/FakeNTP/actions/workflows/tests.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/tests.yml)
 [![CodeQL](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml/badge.svg)](https://github.com/CuckooEXE/FakeNTP/actions/workflows/codeql.yml)
 
 # FakeNTP
-A light-weight Network Time Protocol server that allows you to respond to NTP requests in a malicious manner. 
+A light-weight Network Time Protocol server that allows you to respond to NTP requests in a malicious manner.
 
 <p align="center">
   <img width="350" src="https://raw.githubusercontent.com/CuckooEXE/FakeNTP/main/FakeNTP.png">
@@ -33,12 +33,11 @@ options:
                         The NTP server to pass requests to. Default is "pool.ntp.org".
 ```
 
-This project is 100% Python3, no dependencies required (the `requirements.txt` is just for the test suites). For most use-cases, you will want to modify the response NTP structure in `FakeNTP.py:ThreadedUDPRequestHandler:handle` to best fit your needs. 
+This project is 100% Python3, no dependencies required (the `requirements.txt` is just for the test suites). For most use-cases, you will want to modify the response NTP structure in `FakeNTP.py:ThreadedUDPRequestHandler:handle` to best fit your needs.
 
 
 ## Testing
-This project contains two test suites: a simple suite to test the utility functions: `tests/test_utilities`, and more full-fledged functional tests: `test_server.py`. To run these tests, you can just execute:
-
+This project uses `pytest` and `pytest-cov` to test the utilities and functionality of the server.
 ```bash
 $ PYTHONPATH="$PWD" python3 -m pytest --cov=FakeNTP tests/
 ```
