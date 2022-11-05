@@ -39,7 +39,7 @@ This project is 100% Python3, no dependencies required (the `requirements.txt` i
 ## Testing
 This project uses `pytest` and `pytest-cov` to test the utilities and functionality of the server.
 ```bash
-$ PYTHONPATH="$PWD" python3 -m pytest --cov=FakeNTP tests/
+$ PYTHONPATH="$PWD" sudo python3 -m pytest --cov=FakeNTP tests/
 ```
 
 ## Resources

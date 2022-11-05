@@ -6,48 +6,61 @@ Test the server functionality of FakeNTP.
 """
 Imported Libraries
 
+pytest - Used to run the tests.
 datetime - Used to get the current time.
 threading - Thread management.
 socketserver - Used to create a multi-threaded server.
-argparse - Mock command line arguments.
 ntplib - Used to send NTP requests.
 FakeNTP - Used to test the utility functions.
 """
+import pytest
 import datetime
 import threading
 import socketserver
-import argparse
 import ntplib
 import FakeNTP
 
 
-def start_server(args: argparse.Namespace) -> socketserver.ThreadingUDPServer:
-    """
-    Start the FakeNTP server.
+@pytest.fixture
+def server(request: pytest.FixtureRequest):
+    """Setup and teardown server
 
-    :param args: Command line arguments
-    :type args: argparse.Namespace
-    :return: Server
-    :rtype: socketserver.ThreadingUDPServer
+    :param request: Pytest Request
+    :type request: pytest.FixtureRequest
+    :yield: Server object
+    :rtype: Iterator[FakeNTP.ThreadedUDPRequestHandler]
     """
+    args = FakeNTP.build_parser().parse_args(
+        request.param.split(" ") if request.param else []
+    )
     server = socketserver.ThreadingUDPServer(
         (args.ip, args.port), FakeNTP.ThreadedUDPRequestHandler
     )
-    server.RequestHandlerClass.args = (
-        args  # Store the arguments in the server object, thanks Python
-    )
+    server.RequestHandlerClass.args = args
     threading.Thread(target=server.serve_forever).start()
-    return server
+    yield server
+    server.shutdown()
 
 
-def test_default_arguments():
+@pytest.mark.parametrize("server", [""], indirect=True)
+def test_default_arguments(server):
     """
     Test the default arguments.
     """
-    args = FakeNTP.build_parser().parse_args("")
-    server = start_server(args)
     c = ntplib.NTPClient()
     response = c.request("127.0.0.1", version=3)
     expected = datetime.datetime.now().timestamp()
     assert abs(response.tx_time - expected) < 1
-    server.shutdown()
+
+
+@pytest.mark.parametrize("server", ["--port 8080"], indirect=True)
+def test_port(server):
+    """
+    Test the --port argument.
+    """
+    c = ntplib.NTPClient()
+    with pytest.raises(ntplib.NTPException):
+        response = c.request("127.0.0.1", version=3)
+    response = c.request("127.0.0.1", port=8080, version=3)
+    expected = datetime.datetime.now().timestamp()
+    assert abs(response.tx_time - expected) < 1
