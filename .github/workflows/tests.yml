@@ -22,7 +22,7 @@ jobs:
           python-version: '3.10'
 
       - name: Install Dependencies
-        run: python3 -m pip install -r requirements.txt
+        run: sudo python3 -m pip install -r requirements.txt
 
       - name: Run Tests
         run: PYTHONPATH="${GITHUB_WORKSPACE}" sudo python3 -m pytest --cov=FakeNTP tests/
