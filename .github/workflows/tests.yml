@@ -6,9 +6,6 @@ on:
   pull_request:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
-  schedule:
-    - cron: '23 12 * * 1'
-
 jobs:
   tests:
     runs-on: ubuntu-latest
