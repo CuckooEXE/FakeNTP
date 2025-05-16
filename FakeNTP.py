@@ -2,7 +2,15 @@
 FakeNTP - A light-weight fake Network Time Protocol server that allows you to
             trick NTP clients into changing their time.
 """
-
+import argparse
+import datetime
+import socketserver
+import logging
+import signal
+import socket
+import sys
+import time
+from packets import NTPLI, NTPVN, NTPMode, NTPStratum, NTPv3
 
 """
 Imported Libraries
@@ -17,15 +25,7 @@ sys - Used to exit the process.
 time - Used to get the epoch time.
 packets - Used to create the NTP packet.
 """
-import argparse
-import datetime
-import socketserver
-import logging
-import signal
-import socket
-import sys
-import time
-from packets import NTPLI, NTPVN, NTPMode, NTPStratum, NTPv3
+
 
 
 """
@@ -123,7 +123,11 @@ class ThreadedUDPRequestHandler(socketserver.BaseRequestHandler):
 
         # Update the time if we're using a static time
         if not self.args.static_time and not self.args.time_step:
-            self.args.time = datetime.datetime.now().timestamp()
+            if self.args.offset:
+                self.args.time = (datetime.datetime.now() + datetime.timedelta(hours=self.args.offset[0],
+                                                                               minutes=self.args.offset[1])).timestamp()
+            else:
+                self.args.time = datetime.datetime.now().timestamp()
         now = system_to_ntp_time(self.args.time)
 
         # Build the NTP response
@@ -213,6 +217,13 @@ def build_parser() -> argparse.ArgumentParser:
         type=str,
         default="pool.ntp.org",
         help='The NTP server to pass requests to. Default is "pool.ntp.org".',
+    )
+    parser.add_argument(
+        "--offset",
+        nargs='+',
+        type=int,
+        default=[0,0],
+        help='timeoffset for each response',
     )
     return parser
 

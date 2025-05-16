@@ -31,6 +31,7 @@ options:
   --passthru            Pass through requests to the real NTP server.
   --ntp-server NTP_SERVER
                         The NTP server to pass requests to. Default is "pool.ntp.org".
+  --offset hours days   The offset of the NTP server from real time in hours and minutes
 ```
 
 This project is 100% Python3, no dependencies required (the `requirements.txt` is just for the test suites). For most use-cases, you will want to modify the response NTP structure in `FakeNTP.py:ThreadedUDPRequestHandler:handle` to best fit your needs.
